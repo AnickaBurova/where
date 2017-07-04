@@ -2,11 +2,10 @@ module Main where
 
 import System.Environment
 import System.Directory
-import Anca.Pipe
 import System.FilePath
 
 main :: IO ()
-main = 
+main =
     getArgs >>= parse
 
 parse [fileName] = whereIs fileName
@@ -17,13 +16,13 @@ filesInDirectory fp = do
     isDir <- doesDirectoryExist fp
     if isDir then do
         files <- getDirectoryContents fp
-        res <- files |> filter (/="..") |> filter (/=".")|> map ((fp++"/")++) |> map filesInDirectory |> sequence
-        return $ res |> concat 
+        res <- sequence.map (filesInDirectory.((fp++"/")++)).filter (/=".").filter (/="..") $ files
+        return $ concat res
     else
         return [fp]
 
 whereIs fn = do
     content <- filesInDirectory "."
-    content |> filter ((fn==).takeFileName) |> head |> putStrLn
+    putStrLn.head $ filter ((fn==).takeFileName) content
 
 
